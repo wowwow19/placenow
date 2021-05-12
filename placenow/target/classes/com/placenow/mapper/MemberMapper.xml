@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.placenow.mapper.MemberMapper">
+	<resultMap type="com.placenow.domain.MemberVO" id="memberMap">
+		<id property="userId" column="userid"/> <!-- PK 역할인 컬럼 -->
+		<result property="userId" column="userid"/>
+		<result property="userPw" column="userpw"/>
+		<result property="userName" column="username"/>
+		<result property="birthYear" column="birthyear"/>
+		<result property="gender" column="gender"/>
+		<result property="regDate" column="regdate"/>
+		<collection property="authList" resultMap="authMap"></collection>
+	</resultMap>
+	
+	<resultMap type="com.placenow.domain.AuthVO" id="authMap">
+		<result property="userId" column="userid"/>
+		<result property="auth" column="auth"/>
+	</resultMap>
+	
+	<select id="read" resultMap="memberMap">
+		SELECT *
+		FROM MEMBER
+		JOIN MEMBER_AUTH
+		USING(USERID)
+		WHERE USERID = #{userId}
+	</select>
+	
+	<insert id="register">
+		<if test="phone != null and newsletter != null">
+		INSERT INTO MEMBER(USERID, USERPW, USERNAME, BIRTHYEAR, GENDER, NEWSLETTER, PHONE)
+		VALUES (#{userId}, #{userPw}, #{userName}, #{birthYear}, #{gender}, #{newsletter}, #{phone})
+		</if>
+		<if test="phone != null and newsletter == null">
+		INSERT INTO MEMBER(USERID, USERPW, USERNAME, BIRTHYEAR, GENDER, PHONE)
+		VALUES (#{userId}, #{userPw}, #{userName}, #{birthYear}, #{gender}, #{phone})
+		</if>
+		<if test="phone == null and newsletter != null">
+		INSERT INTO MEMBER(USERID, USERPW, USERNAME, BIRTHYEAR, GENDER, NEWSLETTER)
+		VALUES (#{userId}, #{userPw}, #{userName}, #{birthYear}, #{gender}, #{newsletter})
+		</if>
+		<if test="phone == null and newsletter == null">
+		INSERT INTO MEMBER(USERID, USERPW, USERNAME, BIRTHYEAR, GENDER)
+		VALUES (#{userId}, #{userPw}, #{userName}, #{birthYear}, #{gender})
+		</if>
+	</insert>
+	
+	<insert id="grantMemberAuth">
+		INSERT INTO MEMBER_AUTH(USERID, AUTH)
+		VALUES (#{userId}, #{auth})
+	</insert>
+	
+	<insert id="addTerms">
+		<if test="location != null">
+		INSERT INTO TERMS(USERID, USE, PRIVACY, LOCATION)
+		VALUES (#{userId}, #{use}, #{privacy}, #{location})
+		</if>
+		<if test="location == null">
+		INSERT INTO TERMS(USERID, USE, PRIVACY)
+		VALUES (#{userId}, #{use}, #{privacy})
+		</if>
+	</insert>
+	
+</mapper>

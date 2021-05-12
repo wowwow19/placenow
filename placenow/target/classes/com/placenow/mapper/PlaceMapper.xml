@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.placenow.mapper.PlaceMapper">
+	<select id="getList" resultType="com.placenow.domain.PlaceVO">
+		SELECT PNO, REGION, CATEGORY, PNAME, ADDRESS, POPULARITY, FAVNUM, REPLYNUM,
+			CASE
+			    WHEN (SYSDATE - UPDATEDATE) >= 365 THEN TRUNC((SYSDATE - UPDATEDATE)/365) || '년전'
+			    WHEN (SYSDATE - UPDATEDATE) >= 30 THEN TRUNC((SYSDATE - UPDATEDATE)/30) || '개월전'
+			    WHEN (SYSDATE - UPDATEDATE) >= 1 THEN TRUNC(SYSDATE - UPDATEDATE) || '일전'
+			    WHEN (SYSDATE - UPDATEDATE)*24 >= 1 THEN TRUNC((SYSDATE - UPDATEDATE)*24) || '시간전'
+			    WHEN (SYSDATE - UPDATEDATE)*24*60 >= 1 THEN TRUNC((SYSDATE - UPDATEDATE)*24*60) || '분전'
+			    ELSE TRUNC((SYSDATE - UPDATEDATE)*24*60*60) || '초전'
+			END UPDATEDATE
+		FROM PLACE
+		WHERE PNO > 0
+	</select>
+	
+	<select id="getListByCategory" resultType="com.placenow.domain.PlaceVO">
+		SELECT
+			/*+ INDEX(PLACE IDX_PLACE_REGION) */
+			PNO, REGION, CATEGORY, PNAME, ADDRESS, POPULARITY, FAVNUM, REPLYNUM,
+			CASE
+			    WHEN (SYSDATE - UPDATEDATE) >= 365 THEN TRUNC((SYSDATE - UPDATEDATE)/365) || '년전'
+			    WHEN (SYSDATE - UPDATEDATE) >= 30 THEN TRUNC((SYSDATE - UPDATEDATE)/30) || '개월전'
+			    WHEN (SYSDATE - UPDATEDATE) >= 1 THEN TRUNC(SYSDATE - UPDATEDATE) || '일전'
+			    WHEN (SYSDATE - UPDATEDATE)*24 >= 1 THEN TRUNC((SYSDATE - UPDATEDATE)*24) || '시간전'
+			    WHEN (SYSDATE - UPDATEDATE)*24*60 >= 1 THEN TRUNC((SYSDATE - UPDATEDATE)*24*60) || '분전'
+			    ELSE TRUNC((SYSDATE - UPDATEDATE)*24*60*60) || '초전'
+			END UPDATEDATE
+		FROM PLACE
+		WHERE ROWNUM &lt;= 10
+		<if test="pno != null">
+		AND PNO > #{pno}
+		</if>
+		<if test="region != null">
+		AND REGION = #{region}
+		</if>
+		<if test="category != null">
+		AND CATEGORY = #{category}
+		</if>
+		<if test="keyword != null">
+		AND PNAME LIKE '%'||#{keyword}||'%'
+		</if>
+	</select>
+			
+	<select id="get" resultType="com.placenow.domain.PlaceVO">
+		SELECT PNO, REGION, CATEGORY, PNAME, ADDRESS, POPULARITY, FAVNUM, REPLYNUM
+		FROM PLACE
+		WHERE PNO > 0 
+		AND PNO = #{pno}
+	</select>
+	
+	<select id="getTotalByRegion" resultType="int">
+		SELECT COUNT(*)
+		FROM PLACE
+		GROUP BY CUBE(REGION)
+	</select>
+	
+	<select id="getRecentReply" resultType="int">
+		SELECT COUNT(*)
+		FROM PLACE_REPLY
+		WHERE TO_CHAR(REGDATE, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+		AND PNO = #{pno}
+		AND USERID = #{userId}
+	</select>
+	
+	<select id="getFavList" resultType="com.placenow.domain.PlaceVO">
+		SELECT PNO, REGION, CATEGORY, PNAME, ADDRESS, POPULARITY, FAVNUM, REPLYNUM,
+			CASE
+			    WHEN (SYSDATE - UPDATEDATE) >= 365 THEN TRUNC((SYSDATE - UPDATEDATE)/365) || '년전'
+			    WHEN (SYSDATE - UPDATEDATE) >= 30 THEN TRUNC((SYSDATE - UPDATEDATE)/30) || '개월전'
+			    WHEN (SYSDATE - UPDATEDATE) >= 1 THEN TRUNC(SYSDATE - UPDATEDATE) || '일전'
+			    WHEN (SYSDATE - UPDATEDATE)*24 >= 1 THEN TRUNC((SYSDATE - UPDATEDATE)*24) || '시간전'
+			    WHEN (SYSDATE - UPDATEDATE)*24*60 >= 1 THEN TRUNC((SYSDATE - UPDATEDATE)*24*60) || '분전'
+			    ELSE TRUNC((SYSDATE - UPDATEDATE)*24*60*60) || '초전'
+			END UPDATEDATE
+		FROM PLACE
+		JOIN FAVORITE
+		USING(PNO)
+		WHERE USERID = #{userId}
+	</select>
+	
+	<insert id="add">
+		INSERT INTO PLACE(PNO, REGION, CATEGORY, PNAME, ADDRESS)
+		VALUES (SEQ_PLACE.NEXTVAL, #{region}, #{category}, #{pname}, #{address})
+	</insert>
+	
+	<insert id="addSelectKey">
+		<selectKey keyProperty="pno" order="BEFORE" resultType="int">
+			SELECT SEQ_PLACE.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO PLACE(PNO, REGION, CATEGORY, PNAME, ADDRESS)
+		VALUES (#{pno}, #{region}, #{category}, #{pname}, #{address})
+	</insert>
+	
+	<update id="update">
+		UPDATE PLACE
+		SET PNAME = #{pname},
+			ADDRESS = #{address},
+			REGION = #{region},
+			CATEGORY = #{category}
+		WHERE PNO = #{pno}
+	</update>
+	
+	<insert id="addFavList">
+		INSERT INTO FAVORITE(PNO, USERID)
+		VALUES (#{pno}, #{userId})
+	</insert>
+	
+	<delete id="removeFavList">
+		DELETE FROM FAVORITE
+		WHERE PNO = #{pno}
+		AND USERID = #{userId}
+	</delete>
+	
+</mapper>

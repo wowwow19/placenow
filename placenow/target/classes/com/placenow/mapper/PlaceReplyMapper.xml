@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.placenow.mapper.PlaceReplyMapper">
+	<insert id="insert">
+		<selectKey keyProperty="rno" order="BEFORE" resultType="int">
+			SELECT SEQ_PLACE_REPLY.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO PLACE_REPLY(RNO, PNO, USERID, CONTENT) 
+		VALUES (#{rno}, #{pno}, #{userId}, #{content})
+	</insert>
+	
+	<select id="getList" resultType="com.placenow.domain.PlaceReplyVO">
+		SELECT 
+			/*+ INDEX_DESC(PLACE_REPLY PK_PLACE_REPLY)*/
+			RNO, PNO, USERID, CONTENT, LIKENUM,
+			CASE
+			    WHEN (SYSDATE - REGDATE) >= 365 THEN TRUNC((SYSDATE - REGDATE)/365) || '년전'
+			    WHEN (SYSDATE - REGDATE) >= 30 THEN TRUNC((SYSDATE - REGDATE)/30) || '개월전'
+			    WHEN (SYSDATE - REGDATE) >= 1 THEN TRUNC(SYSDATE - REGDATE) || '일전'
+			    WHEN (SYSDATE - REGDATE)*24 >= 1 THEN TRUNC((SYSDATE - REGDATE)*24) || '시간전'
+			    WHEN (SYSDATE - REGDATE)*24*60 >= 1 THEN TRUNC((SYSDATE - REGDATE)*24*60) || '분전'
+			    ELSE TRUNC((SYSDATE - REGDATE)*24*60*60) || '초전'
+			END REGDATE
+		FROM PLACE_REPLY
+		WHERE PNO = #{pno}
+		AND ROWNUM &lt;= 10
+		<if test="rno != null">
+		AND RNO &lt; #{rno}
+		</if>
+	</select>
+	
+	<select id="get" resultType="com.placenow.domain.PlaceReplyVO">
+		SELECT 
+			RNO, PNO, USERID, CONTENT, LIKENUM,
+			CASE
+			    WHEN (SYSDATE - REGDATE) >= 365 THEN TRUNC((SYSDATE - REGDATE)/365) || '년전'
+			    WHEN (SYSDATE - REGDATE) >= 30 THEN TRUNC((SYSDATE - REGDATE)/30) || '개월전'
+			    WHEN (SYSDATE - REGDATE) >= 1 THEN TRUNC(SYSDATE - REGDATE) || '일전'
+			    WHEN (SYSDATE - REGDATE)*24 >= 1 THEN TRUNC((SYSDATE - REGDATE)*24) || '시간전'
+			    WHEN (SYSDATE - REGDATE)*24*60 >= 1 THEN TRUNC((SYSDATE - REGDATE)*24*60) || '분전'
+			    ELSE TRUNC((SYSDATE - REGDATE)*24*60*60) || '초전'
+			END REGDATE
+		FROM PLACE_REPLY
+		WHERE RNO = #{rno}
+	</select>
+	
+	<insert id="like">
+		INSERT INTO REPLY_LIKE(RNO, USERID)
+		VALUES (#{rno}, #{userId})
+	</insert>
+	
+	<delete id="unlike">
+		DELETE FROM REPLY_LIKE
+		WHERE RNO = #{rno}
+		AND USERID = #{userId}
+	</delete>
+	
+	<select id="getLikeList" resultType="int">
+		SELECT RNO
+		FROM REPLY_LIKE L
+		JOIN PLACE_REPLY R
+		USING(RNO)
+		WHERE PNO = #{pno}
+		AND L.USERID = #{userId}
+	</select>
+	
+	<select id="getRegDate" resultType="boolean">
+		SELECT 
+			CASE
+				WHEN MAX(REGDATE) - SYSDATE &lt; 1 THEN '0'
+				ELSE '1'
+			END REGDATE
+		FROM PLACE_REPLY
+		WHERE PNO = #{pno}
+		AND USERID = #{userId}
+	</select>
+</mapper>
