@@ -19,6 +19,7 @@
 	<context:component-scan base-package="com.placenow.domain" />
 	<context:component-scan base-package="com.placenow.aop" />
 	<context:component-scan base-package="com.placenow.security" />
+	<context:component-scan base-package="com.placenow.task" />
 	<tx:annotation-driven />
 	<aop:aspectj-autoproxy />
 	
@@ -58,7 +59,7 @@
 		<property name="host" value="smtp.gmail.com" /> <!-- 메이서버 호스트 -->
 		<property name="port" value="587" /> <!-- 메이서버 포트번호 -->
 		<property name="username" value="placenowverify@gmail.com" /> <!-- 자신의 이메일 아이디 -->
-		<property name="password" value="@kitkat2327" /> <!-- 자신의 비밀번호 -->
+		<property name="password" value="@placenowvefify22" /> <!-- 자신의 비밀번호 -->
 		<!-- 보안연결 SSL과 관련된 설정 -->
 		<property name="javaMailProperties">
 			<props>

@@ -20,6 +20,6 @@ public interface PlaceAttachMapper {
 	@Delete("DELETE FROM PLACE_ATTACH")
 	void deleteAllComplete();
 	
-	@Select("SELECT * FROM TBL_ATTACH WHERE UPLOADPATH = TO_CHAR(SYSDATE - 1, 'YYYY/MM/DD')")
+	@Select("SELECT * FROM PLACE_ATTACH WHERE UPLOADPATH = TO_CHAR(SYSDATE - 1, 'YYYY/MM/DD')")
 	List<PlaceAttachVO> getOldFiles();
 }

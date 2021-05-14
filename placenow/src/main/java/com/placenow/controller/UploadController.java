@@ -39,8 +39,8 @@ import net.coobird.thumbnailator.Thumbnailator;
 @Log4j
 public class UploadController implements ServletContextAware {
 	private ServletContext servletContext;
-	public static final String UPLOAD_PATH = "/Users/user/upload/placenow/";
-//	public static final String UPLOAD_PATH = "c:/upload/placenow/";
+//	public static final String UPLOAD_PATH = "/Users/user/upload/placenow/";
+	public static final String UPLOAD_PATH = "c:/upload/placenow/";
 	
 	@Override
 	public void setServletContext(ServletContext servletContext) {
