@@ -82,6 +82,7 @@
 		</div>
 	</div>
 
+	<c:if test="${not empty attachList}">
 	<div id="demo" class="carousel slide mt-3" data-ride="carousel"
 		id="placePictures">
 
@@ -125,9 +126,8 @@
 				</c:when>
 			</c:choose>
 		</div>
-
 	</div>
-
+	</c:if>
 
 	<div class="place-detail-map" id="map"></div>
 
